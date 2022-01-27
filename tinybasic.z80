@@ -1,3 +1,22 @@
+; macros not provided by original source
+
+    OUTPUT "tinybasic.bin",t
+
+    MACRO TSTC ch, address
+       db ch
+       dw address
+    ENDM
+
+    MACRO ITEM text, address
+       IF text[#] > 0
+           BYTE text
+       ENDIF
+       DW address
+    ENDM
+
+@CR    EQU 0DH
+@LF    EQU 0AH
+
 ; ***********************************************************************
 ; *
 ; *                     T B I
