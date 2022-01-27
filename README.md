@@ -18,4 +18,4 @@ Things missing for complete conversion
 
 * ~Write macros and constants;~
 * ~Fix `ORG`s memory addresses to start Tiny BASIC as a COM binary in MSX-DOS;~
-* ~Replace `OUT`s and `IN`s with MSX BIOS calls;~
+* Replace `OUT`s and `IN`s with MSX BIOS calls;

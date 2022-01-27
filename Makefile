@@ -1,6 +1,6 @@
 AS := sjasmplus
 
-TINYBAS.COM:
+TINYBAS.COM: tinybasic.z80
 	$(AS) tinybasic.z80
 
 

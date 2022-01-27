@@ -1463,17 +1463,32 @@ GL5    INC DE           ;   END OF LINE
        LD (DE),A
        DEC DE
        JP CRLF
-@OUT@  ; PUSH AF
-       RST 018H         ;   OUTPUT ROUTINE
+@OUT@  PUSH AF
+       PUSH BC
+       PUSH DE
+       PUSH HL
+       LD E,A
+       LD C,02H         ;   OUTPUT ROUTINE
+       CALL BDOS
+       POP HL
+       POP DE
+       POP BC
+       POP AF
        CP @CR           ;   WAS IT CR?
        RET NZ           ;   NO, RETURN
        LD A,@LF         ;   YES, GIVE LF
-       RST 018H
+       CALL @OUT@
        LD A,@CR
        RET
-@IN@   CALL CHSNS       ;   INPUT AVAILABLE?
-       RET Z            ;   NO INPUT, RETURN ZERO
-       CALL CHGET       ;   CHECK INPUT
+@IN@   PUSH BC
+       PUSH DE
+       PUSH HL
+       LD E,0FFH
+       LD C,06H         ;   INPUT ROUTINE
+       CALL BDOS
+       POP HL
+       POP DE
+       POP BC
        RET              ;   
        CP 003H          ;   IS IT CONTROL-C?
        RET NZ           ;   NO, RETURN CH.
