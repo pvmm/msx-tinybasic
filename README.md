@@ -6,11 +6,16 @@ After using https://github.com/pvmm/8080-to-z80 to convert assembly code from 80
 Requirements
 ------------
 
-Currently, the source code should compile with SjASMPlus (https://z00m128.github.io/sjasmplus/documentation.html)
+Currently, the source code should compile with SjASMPlus (https://z00m128.github.io/sjasmplus/documentation.html). To compile it
+```
+make
+```
+will create an executable called `TINYBAS.COM`. Just put that in your bootable MSX-DOS disk or HD and call `TINYBAS` at the command line.
+
 
 Things missing for complete conversion
 --------------------------------------
 
 * ~Write macros and constants;~
-* Fix `ORG`s memory addresses to start Tiny BASIC as a COM binary in MSX-DOS;
-* Replace `OUT`s and `IN`s with MSX BIOS calls;
+* ~Fix `ORG`s memory addresses to start Tiny BASIC as a COM binary in MSX-DOS;~
+* ~Replace `OUT`s and `IN`s with MSX BIOS calls;~
