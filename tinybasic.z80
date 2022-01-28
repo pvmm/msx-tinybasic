@@ -1038,10 +1038,9 @@ ERRO1  CALL CRLF
        LD HL,(CURRNT)   ;   GET CURRENT LINE #
        PUSH HL
        LD A,H           ;   CHECK THE VALUE
-       INC HL
-       OR (HL)
-       POP DE
+       OR A,L
        JP Z,TELL        ;   IF ZERO, JUST RESTART
+       POP DE
        LD A,(HL)        ;   IF NEGATIVE,
        OR A
        JP (HL),INPERR   ;   REDO INPUT
