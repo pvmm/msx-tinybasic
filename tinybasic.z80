@@ -1,3 +1,4 @@
+
     OUTPUT "TINYBAS.COM",t
 
 ; macros not provided by original source
@@ -47,7 +48,7 @@ TOPSCR EQU 01000H
 BOTRAM EQU 01000H
 DFTLMT EQU 0D000H
 BOTROM EQU 0D000H
-
+; *
 ; ***********************************************************************
 ; *
 ; * *** INITIALIZE ***
@@ -137,7 +138,7 @@ SORRY  DB "SORRY",@CR
 ; * SHOULD POINT TO A 0.
 ; *
 RSTART LD SP,STACK      ;   RE-INITIALIZE STACK
-       LD HL,ST1+1      ;   LITERAL 0
+       LD HL,(ST1+1)    ;   LITERAL 0
        LD (CURRNT),HL   ;   CURRNT->LINE # = 0
 ST1    LD HL,0
        LD (LOPVAR),HL
@@ -163,7 +164,7 @@ ST2    LD A,'>'         ;   PROMPT '>' AND
        PUSH BC          ;   BC,DE->BEGIN, END
        PUSH DE
        LD A,C
-       SUB E
+       SUB A,E
        PUSH AF          ;   A=# OF BYTES IN LINE
        CALL FNDLN       ;   FIND THIS LINE IN SAVE
        PUSH DE          ;   AREA, DE->SAVE AREA
@@ -171,13 +172,13 @@ ST2    LD A,'>'         ;   PROMPT '>' AND
        PUSH DE          ;   Z:FOUND, DELETE IT
        CALL FNDNXT      ;   SET DB->NEXT LINE
        POP BC           ;   BC->LINE TO BE DELETED
-       LD HL,TXTUNF     ;   HL->UNFILLED SAVE AREA
+       LD HL,(TXTUNF)   ;   HL->UNFILLED SAVE AREA
        CALL MVUP        ;   MOVE UP TO DELETE
        LD H,B           ;   TXTUNF->UNFILLED AREA
        LD L,C
        LD (TXTUNF),HL   ;   UPDATE
 ST3    POP BC           ;   GET READY TO INSERT
-       LD HL,TXTUNF     ;   BUT FIRST CHECK IF
+       LD HL,(TXTUNF)   ;   BUT FIRST CHECK IF
        POP AF           ;   THE LENGTH OF NEW LINE
        PUSH HL          ;   IS 3 (LINE # AND CR)
        CP 3             ;   THEN DO NOT INSERT
@@ -187,7 +188,7 @@ ST3    POP BC           ;   GET READY TO INSERT
        LD A,0
        ADC A,H
        LD D,A           ;   DE->NEW UNFILLED AREA
-       LD HL,TXTLMT     ;   CHECK TO SEE IF THERE
+       LD HL,(TXTLMT)   ;   CHECK TO SEE IF THERE
        EX DE,HL
        CALL COMP        ;   IS ENOUGH SPACE
        JP NC,QSORRY     ;   SORRY, NO ROOM FOR IT
@@ -431,9 +432,9 @@ GOSUB  CALL PUSHA       ;   SAVE THE CURRENT "FOR"
        PUSH DE          ;   AND TEXT POINTER
        CALL FNDLN       ;   FIND THE TARGET LINE
        JP NZ,AHOW       ;   NOT THERE. SAY "HOW?"
-       LD HL,CURRNT     ;   SAVE OLD
+       LD HL,(CURRNT)   ;   SAVE OLD
        PUSH HL          ;   'CURRNT' OLD 'STKGOS'
-       LD HL,STKGOS
+       LD HL,(STKGOS)
        PUSH HL
        LD HL,0          ;   AND LOAD NEW ONES
        LD (LOPVAR),HL
@@ -527,7 +528,7 @@ FR6    LD A,(HL)        ;   GET THAT OLD 'LOPVAR'
        ADD HL,DE
        CALL MVDOWN      ;   AND PURGE 10 WORDS
        LD SP,HL         ;   IN THE STACK
-FR7    LD HL,LOPPT      ;   JOB DONE, RESTORE DE
+FR7    LD HL,(LOPPT)    ;   JOB DONE, RESTORE DE
        EX DE,HL
        JP FINISH        ;   AND CONTINUE
 ; *
@@ -544,26 +545,26 @@ NX1    PUSH DE          ;   SAVE TEXT POINTER
        JP Z,NX2         ;   OK, THEY AGREE
        POP DE           ;   NO, LET'S SEE
        CALL POPA        ;   PURGE CURRENT LOOP
-       LD HL,VARNXT     ;   AND POP ONE LEVEL
+       LD HL,(VARNXT)   ;   AND POP ONE LEVEL
        JP NX1           ;   GO CHECK AGAIN
 NX2    LD E,H           ;   COME HERE WHEN AGREED
        INC HL
        LD D,(HL)        ;   DE=VALUE OF VAR.
-       LD HL,LOPINC
+       LD HL,(LOPINC)
        PUSH HL
        LD A,H
        XOR D            ;   S=SIGN DIFFER
        LD A,D           ;   A=SIGN OF DE
        ADD HL,DE        ;   ADD ONE STEP
-       JP M,NX3         ;   CANNOT OVERFLOW
+       JP (HL),NX3      ;   CANNOT OVERFLOW
        XOR H            ;   MAY OVERFLOW
-       JP M,NX5         ;   AND IT DID
+       JP (HL),NX5      ;   AND IT DID
 NX3    EX DE,HL
-       LD HL,LOPVAR     ;   PUT IT BACK
+       LD HL,(LOPVAR)   ;   PUT IT BACK
        LD (HL),E
        INC HL
        LD (HL),D
-       LD HL,LOPLMT     ;   HL=LIMIT
+       LD HL,(LOPLMT)   ;   HL=LIMIT
        POP AF           ;   OLD HL
        OR A
        JP P,NX4         ;   STEP > 0
@@ -665,7 +666,7 @@ IP11   LD B,E
 IP12   POP BC           ;   RETURN ADDRESS
        PUSH DE          ;   SAVE TEXT POINTER
        EX DE,HL
-       LD HL,CURRNT     ;   ALSO SAVE 'CURRNT'
+       LD HL,(CURRNT)   ;   ALSO SAVE 'CURRNT'
        PUSH HL
        LD HL,IP1        ;   A NEGATIVE NUMBER
        LD (CURRNT),HL   ;   AS A FLAG
@@ -769,7 +770,7 @@ XP14   EX DE,HL         ;   2ND IN DE
        LD A,D
        ADD HL,DE
        POP DE           ;   RESTORE TEXT POINTER
-       JP M,XP13        ;   1ST 2ND SIGNAL DIFFER
+       JP (HL),XP13     ;   1ST 2ND SIGNAL DIFFER
        XOR H            ;   1ST 2ND SIGNAL EQUAL
        JP P,XP13        ;   SO IS RESULT
        JP QHOW          ;   ELSE WE HAVE OVERFLOW
@@ -826,7 +827,7 @@ XP24   TSTC '/',XPR9    ;   DIVIDE?
 XP25   POP DE           ;   AND TEXT POINTER
        LD A,H           ;   HL MUST BE +
        OR A
-       JP M,QHOW        ;   ELSE IT IS OVERFLOW
+       JP (HL),QHOW     ;   ELSE IT IS OVERFLOW
        LD A,B
        OR A
        CALL M,CHGSGN    ;   CHANGE SIGN IF NEEDED
@@ -854,7 +855,7 @@ XPR0   JP QWHAT         ;   ELSE SAY: "WHAT?"
 RND    CALL PARN        ;   *** RND(EXPR) ***
        LD A,H           ;   EXPR MUST BE +
        OR A
-       JP M,QHOW
+       JP (HL),QHOW
        OR L             ;   AND NON-ZERO
        JP Z,QHOW
        PUSH DE          ;   SAVE BOTH
@@ -882,10 +883,10 @@ ABS_   CALL PARN        ;   *** ABS(EXPR) ***
        CALL CHKSGN      ;   CHECK SIGN
        INC DE
        RET
-SIZE   LD HL,TXTUNF     ;   *** SIZE ***
+SIZE   LD HL,(TXTUNF)   ;   *** SIZE ***
        PUSH DE          ;   GET THE NUMBER OF FREE
        EX DE,HL         ;   BYTES BETWEEN 'TXTUNF'
-       LD HL,TXTLMT     ;   AND 'TXTLMT'
+       LD HL,(TXTLMT)   ;   AND 'TXTLMT'
        CALL SUBDE
        POP DE
        RET
@@ -923,7 +924,7 @@ DV2    INC C            ;   DUMB ROUTINE
        RET
 ; *
 SUBDE  LD A,L           ;   *** SUBDE ***
-       SUB E            ;   SUBTRACT DE FROM
+       SUB A,E          ;   SUBTRACT DE FROM
        LD L,A           ;   HL
        LD A,H
        SBC A,D
@@ -1034,7 +1035,7 @@ QWHAT  PUSH DE          ;   *** QWHAT ***
 AWHAT  LD DE,WHAT       ;   *** AWHAT ***
 ERRO1  CALL CRLF
        CALL PRTSTG      ;   PRINT ERROR MESSAGE
-       LD HL,CURRNT     ;   GET CURRENT LINE #
+       LD HL,(CURRNT)   ;   GET CURRENT LINE #
        PUSH HL
        LD A,H           ;   CHECK THE VALUE
        INC HL
@@ -1043,7 +1044,7 @@ ERRO1  CALL CRLF
        JP Z,TELL        ;   IF ZERO, JUST RESTART
        LD A,(HL)        ;   IF NEGATIVE,
        OR A
-       JP M,INPERR      ;   REDO INPUT
+       JP (HL),INPERR   ;   REDO INPUT
        CALL PRTCHS
        POP BC
        LD B,C
@@ -1075,7 +1076,7 @@ ASORRY LD DE,SORRY      ;   *** ASORRY ***
 ; *
 FNDLN  LD A,H           ;   *** FNDLN ***
        OR A             ;   CHECK SIGN OF HL
-       JP M,QHOW        ;   IT CANNOT BE -
+       JP (HL),QHOW     ;   IT CANNOT BE -
        LD DE,TEXT       ;   INIT. TEXT POINTER
 ; *
 FNDLP  INC DE           ;   IS IT EOT MARK?
@@ -1084,7 +1085,7 @@ FNDLP  INC DE           ;   IS IT EOT MARK?
        ADD A,A
        RET C            ;   C,NZ PASSED END
        LD A,(DE)        ;   WE DID NOT, GET BYTE 1
-       SUB L            ;   IS THIS THE LINE?
+       SUB A,L          ;   IS THIS THE LINE?
        LD B,A           ;   COMPARE LOW ORDER
        INC DE
        LD A,(DE)        ;   GET BYTE 2
@@ -1104,7 +1105,7 @@ FNDSKP LD A,(DE)        ;   *** FNDSKP ***
        JP FNDLP         ;   CHECK IF END OF TEXT
 ; *
 TSTV   CALL IGNBLK      ;   *** TSTV ***
-       SUB '@'          ;   TEST VARIABLES
+       SUB A,'@'        ;   TEST VARIABLES
        RET C            ;   C:NOT A VARIABLE
        JP NZ,TV1        ;   NOT "@" ARRAY
        INC DE           ;   IT IS THE "@" ARRAY
@@ -1216,10 +1217,10 @@ MVUP   CALL COMP        ;   *** MVUP ***
        JP MVUP          ;   UNTIL DONE
 ; *
 MVDOWN LD A,B           ;   *** MVDOWN ***
-       SUB D            ;   TEST IF DE = BC
+       SUB A,D          ;   TEST IF DE = BC
        JP NZ,MD1        ;   NO, GO MOVE
        LD A,C           ;   MAYBE, OTHER BYTE?
-       SUB E
+       SUB A,E
        RET Z            ;   YES, RETURN
 MD1    DEC DE           ;   ELSE MOVE A BYTE
        DEC HL           ;   BUT FIRST DECREASE
@@ -1249,23 +1250,23 @@ PUSHA  LD HL,STKLMT     ;   *** PUSHA ***
        POP BC           ;   BC=RETURN ADDRESS
        ADD HL,SP        ;   IS STACK NEAR THE TOP?
        JP NC,QSORRY     ;   YES, SORRY FOR THAT.
-       LD HL,LOPVAR     ;   ELSE SAVE LOOP VAR,S
+       LD HL,(LOPVAR)   ;   ELSE SAVE LOOP VAR,S
        LD A,H           ;   BUT IF LOPVAR IS 0
        OR L             ;   THAT WILL BE ALL
        JP Z,PU1
-       LD HL,LOPPT      ;   ELSE, MORE TO SAVE
+       LD HL,(LOPPT)    ;   ELSE, MORE TO SAVE
        PUSH HL
-       LD HL,LOPLN
+       LD HL,(LOPLN)
        PUSH HL
-       LD HL,LOPLMT
+       LD HL,(LOPLMT)
        PUSH HL
-       LD HL,LOPINC
+       LD HL,(LOPINC)
        PUSH HL
-       LD HL,LOPVAR
+       LD HL,(LOPVAR)
 PU1    PUSH HL
        PUSH BC          ;   BC = RETURN ADDR.
        RET
-LOCR   LD HL,TXTUNF
+LOCR   LD HL,(TXTUNF)
        DEC HL
        DEC HL
        RET
@@ -1293,7 +1294,7 @@ LOCR   LD HL,TXTUNF
 ; *
 ; * 'PRTLN' FINDS A SAVED LINE, PRINTS THE LINE # AND A SPACE.
 ; *
-PRTSTG SUB A            ;   *** PRTSTG ***
+PRTSTG SUB A,A          ;   *** PRTSTG ***
 PS1    LD B,A
 PS2    LD A,(DE)        ;   GET A CHARACTER
        INC DE           ;   BUMP POINTER
@@ -1325,10 +1326,10 @@ QT4    TSTC 05EH,QT5    ;   IS IT AN UP-ARROW?
        INC DE
        JP QT2
 QT5    RET              ;   NONE OF ABOVE
-PRTCHS LD A,E
-       CP B
-       RET Z
-       LD A,(DE)
+PRTCHS RET              ; LD A,E
+       CP B             ;   REACHED END OF STRING?
+       RET Z            ;   YES
+       LD A,(DE)        ;   NO, PRINT ONE MORE CHAR
        CALL OUTCH
        INC C
        JP PRTCHS
@@ -1358,7 +1359,7 @@ PN6    POP BC           ;   WE GOT ALL DIGITS IN
 PN7    DEC C            ;   THE STACK
        LD A,C           ;   LOOK AT SPACE COUNT
        OR A
-       JP M,PN8         ;   NO LEADING BLANKS
+       JP (HL),PN8      ;   NO LEADING BLANKS
        LD A,' '         ;   LEADING BLANKS
        CALL OUTCH
        JP PN7           ;   MORE?
